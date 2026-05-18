@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DIT Logistics Dashboard</title>
+  <title>DIT Booking @ Crisp Film</title>
   
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
   
@@ -29,7 +29,7 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       margin: 0;
-      padding: 0; /* Ändrat för att tillåta fullskärms-login */
+      padding: 0;
     }
 
     /* ==========================================
@@ -52,17 +52,30 @@
       padding: 40px;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      max-width: 400px;
+      max-width: 450px;
       width: 100%;
     }
-    .login-box h1 { margin-top: 0; font-size: 28px; }
+    .login-box img.logo {
+      height: 60px;
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+    .login-box h1 { margin-top: 0; font-size: 26px; }
     .login-box p { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; line-height: 1.5; }
+    
+    /* Behållare för den renderade Google-knappen */
+    #google-button-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 40px;
+    }
 
     /* ==========================================
        HUVUDAPPEN (DOLD TILLS INLOGGAD)
        ========================================== */
     #app-content {
-      display: none; /* Dold som standard */
+      display: none; 
       padding: 20px;
     }
 
@@ -80,7 +93,16 @@
       padding-bottom: 15px;
       border-bottom: 1px solid var(--border-col);
     }
-    h1 { margin: 0; font-size: 26px; font-weight: 600; color: var(--text-main); letter-spacing: -0.5px; }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header-left img.logo {
+      height: 40px;
+      object-fit: contain;
+    }
+    h1 { margin: 0; font-size: 24px; font-weight: 600; color: var(--text-main); letter-spacing: -0.5px; }
     h1 span { color: var(--gold); }
     
     .user-badge {
@@ -113,7 +135,7 @@
       align-items: center;
     }
 
-    /* Admin Panel (Dold som standard) */
+    /* Admin Panel */
     #admin-panel {
       display: none;
       border: 1px solid var(--gold);
@@ -138,7 +160,7 @@
     .btn-cancel:hover { background-color: #dc2626; }
     .btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Kalender (FullCalendar Overrides) */
+    /* Kalender */
     #calendar { height: 450px; }
     .fc-theme-standard td, .fc-theme-standard th { border-color: var(--border-col); }
     .fc .fc-toolbar-title { font-size: 18px; color: var(--gold); }
@@ -147,7 +169,7 @@
     .fc .fc-daygrid-day-number { color: var(--text-muted); }
     .fc .fc-event { background-color: var(--accent); border: none; padding: 2px; cursor: pointer; }
 
-    /* Två-kolumns layout för formuläret */
+    /* Rutnät & Formulär */
     .split-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -157,7 +179,6 @@
       .split-grid { grid-template-columns: 350px 1fr; }
     }
 
-    /* Formulär & Inputs */
     .form-group { margin-bottom: 20px; }
     label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
     input[type="text"], input[type="email"], input[type="date"], input[type="number"], select {
@@ -165,14 +186,13 @@
     }
     input:disabled, select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Switch Extern Bokare */
     .switch-box {
       display: flex; align-items: center; gap: 10px; background: var(--bg-dark); padding: 12px; border: 1px solid var(--border-col); border-radius: 6px; margin-bottom: 15px;
     }
     .switch-box label { margin: 0; color: var(--text-main); text-transform: none; font-size: 14px; cursor: pointer; }
     .switch-box input[type="checkbox"] { width: 18px; height: 18px; margin: 0; cursor: pointer; }
 
-    /* Inventory / Lagersaldo Lista */
+    /* Inventory */
     .inventory-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -193,7 +213,6 @@
     .inventory-info p { margin: 0; font-size: 12px; font-weight: bold; color: var(--gold); }
     .inventory-info p.slut { color: var(--danger); }
     
-    /* Plus/Minus Räknare */
     .counter-widget { display: flex; align-items: center; background: var(--panel-bg); border-radius: 4px; border: 1px solid var(--border-col); overflow: hidden; }
     .counter-btn { background: transparent; border: none; color: var(--text-main); width: 35px; height: 35px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center;}
     .counter-btn:hover { background: var(--border-col); }
@@ -214,7 +233,7 @@
     .laddar-text { color: var(--accent); font-weight: bold; animation: blink 1.5s infinite; text-align: center;}
     @keyframes blink { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-    /* Kalender Popup (Modal) */
+    /* Modal */
     .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
     .modal-content { background: var(--panel-bg); border: 1px solid var(--border-col); padding: 30px; border-radius: 8px; max-width: 400px; width: 100%; position: relative; }
     .modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 24px; color: var(--text-muted); }
@@ -224,31 +243,22 @@
 
   <div id="login-screen">
     <div class="login-box">
-      <h1>DIT <span>Logistics</span></h1>
+      <img src="logo.png" alt="Crisp Film Logo" class="logo" onerror="this.style.display='none'">
+      
+      <h1>DIT Booking <span>@ Crisp Film</span></h1>
       <p>Detta är ett internt verktyg. Vänligen logga in med ditt Crisp Film-konto för att få tillgång till systemet.</p>
       
-      <div style="display: flex; justify-content: center;">
-        <div id="g_id_onload"
-             data-client_id="591680038387-vovc8rcgo1urfli5pfopdjetk5tnn7tr.apps.googleusercontent.com"
-             data-callback="hanteraGoogleInloggning"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
-             data-type="standard"
-             data-size="large"
-             data-theme="outline"
-             data-text="sign_in_with"
-             data-shape="rectangular"
-             data-logo_alignment="left">
-        </div>
-      </div>
+      <div id="google-button-container"></div>
     </div>
   </div>
 
   <div id="app-content">
     <div class="dashboard-container">
       <header>
-        <h1>DIT <span>Logistics</span></h1>
+        <div class="header-left">
+          <img src="logo.png" alt="Crisp Film Logo" class="logo" onerror="this.style.display='none'">
+          <h1>DIT Booking <span>@ Crisp Film</span></h1>
+        </div>
         <div style="display: flex; align-items: center;">
           <span class="user-badge" id="display-user-email">Ej inloggad</span>
           <button class="btn btn-admin" onclick="laskAdminPanel()">Admin Panel</button>
@@ -357,9 +367,26 @@
 
   <script>
     // ==========================================
-    // 1. GOOGLE INLOGGNINGSLOGIK
+    // 1. GOOGLE INLOGGNINGSLOGIK (JAVASCRIPT API)
     // ==========================================
     
+    // Vi använder JavaScript-rendering för att garantera att knappen alltid fungerar
+    window.onload = function() {
+      if(typeof google !== 'undefined' && google.accounts) {
+        google.accounts.id.initialize({
+          client_id: "591680038387-vovc8rcgo1urfli5pfopdjetk5tnn7tr.apps.googleusercontent.com",
+          callback: hanteraGoogleInloggning
+        });
+        
+        google.accounts.id.renderButton(
+          document.getElementById("google-button-container"),
+          { theme: "outline", size: "large", type: "standard", text: "signin_with" }
+        );
+      } else {
+        document.getElementById("google-button-container").innerHTML = "<p style='color:red'>Kunde inte ladda Google inloggning. Stäng av annonsblockerare.</p>";
+      }
+    };
+
     function parseJwt(token) {
       try {
         var base64Url = token.split('.')[1];
@@ -374,19 +401,16 @@
     }
 
     function hanteraGoogleInloggning(response) {
-      // Om funktionen anropas innebär det att Google har godkänt användaren (rätt domän).
       const payload = parseJwt(response.credential);
       
-      // Visa e-posten uppe till höger i gränssnittet
       if (payload && payload.email) {
         document.getElementById("display-user-email").innerText = "Inloggad som: " + payload.email;
       }
 
-      // Dölj inloggningsskärmen och visa hela appen
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("app-content").style.display = "block";
 
-      // STARTA APPEN (Hämta data från Google Sheets / ClickUp)
+      // Ladda systemet nu när användaren är godkänd
       laddaSystemData();
     }
 
@@ -400,7 +424,6 @@
     let systemData = null;
     let varukorg = {}; 
 
-    // Denna funktion kallades tidigare från window.onload, nu kallas den först när inloggningen är klar.
     function laddaSystemData() {
       fetch(API_URL + "?action=getInitData")
         .then(res => res.json())
