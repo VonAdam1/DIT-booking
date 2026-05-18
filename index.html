@@ -7,17 +7,19 @@
   
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
   
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
   <style>
     /* Premium Dashboard Design (Mörkt tema) */
     :root {
-      --bg-dark: #0f172a;      /* Mörkblå bakgrund */
-      --panel-bg: #1e293b;     /* Något ljusare paneler */
-      --border-col: #334155;   /* Diskreta linjer */
+      --bg-dark: #0f172a;      
+      --panel-bg: #1e293b;     
+      --border-col: #334155;   
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --accent: #3b82f6;       /* Standard blå knapp */
+      --accent: #3b82f6;       
       --accent-hover: #2563eb;
-      --gold: #d4af37;         /* Guld/Premium accent */
+      --gold: #d4af37;         
       --danger: #ef4444;
       --success: #10b981;
     }
@@ -27,6 +29,40 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       margin: 0;
+      padding: 0; /* Ändrat för att tillåta fullskärms-login */
+    }
+
+    /* ==========================================
+       INLOGGNINGSSKÄRM (LOGIN OVERLAY)
+       ========================================== */
+    #login-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .login-box {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-col);
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      max-width: 400px;
+      width: 100%;
+    }
+    .login-box h1 { margin-top: 0; font-size: 28px; }
+    .login-box p { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; line-height: 1.5; }
+
+    /* ==========================================
+       HUVUDAPPEN (DOLD TILLS INLOGGAD)
+       ========================================== */
+    #app-content {
+      display: none; /* Dold som standard */
       padding: 20px;
     }
 
@@ -46,6 +82,15 @@
     }
     h1 { margin: 0; font-size: 26px; font-weight: 600; color: var(--text-main); letter-spacing: -0.5px; }
     h1 span { color: var(--gold); }
+    
+    .user-badge {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.05);
+      padding: 5px 10px;
+      border-radius: 4px;
+      margin-right: 15px;
+    }
 
     /* Paneler */
     .panel {
@@ -177,101 +222,127 @@
 </head>
 <body>
 
-  <div class="dashboard-container">
-    <header>
+  <div id="login-screen">
+    <div class="login-box">
       <h1>DIT <span>Logistics</span></h1>
-      <div>
-        <button class="btn btn-admin" onclick="laskAdminPanel()">Admin Panel</button>
-      </div>
-    </header>
-    
-    <div class="panel" id="admin-panel">
-      <div class="panel-title">
-        <span>Hantera Bokningar (Endast Admin)</span>
-        <button class="btn-admin" onclick="laddarBokningar()">Uppdatera lista</button>
-      </div>
-      <p style="font-size: 13px; color: var(--text-muted);">Här listas alla bokningar. Klicka på 'Makulera' för att avboka och frigöra utrustningen. (Laddar du om sidan låses panelen igen).</p>
+      <p>Detta är ett internt verktyg. Vänligen logga in med ditt Crisp Film-konto för att få tillgång till systemet.</p>
       
-      <div id="admin-laddar" class="laddar-text" style="display:none; padding: 20px;">Hämtar databasen...</div>
-      
-      <div style="overflow-x: auto;">
-        <table class="admin-table" id="admin-table-body">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Projekt</th>
-              <th>Bokare</th>
-              <th>Datum</th>
-              <th>Utrustning</th>
-              <th>Status</th>
-              <th>Åtgärd</th>
-            </tr>
-          </thead>
-          <tbody>
-            </tbody>
-        </table>
+      <div style="display: flex; justify-content: center;">
+        <div id="g_id_onload"
+             data-client_id="591680038387-vovc8rcgo1urfli5pfopdjetk5tnn7tr.apps.googleusercontent.com"
+             data-callback="hanteraGoogleInloggning"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="outline"
+             data-text="sign_in_with"
+             data-shape="rectangular"
+             data-logo_alignment="left">
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="panel">
-      <h2 class="panel-title">Tidslinje & Bokningar</h2>
-      <div id="calendar"></div>
-    </div>
-
-    <div class="panel">
-      <h2 class="panel-title">Skapa ny reservering</h2>
+  <div id="app-content">
+    <div class="dashboard-container">
+      <header>
+        <h1>DIT <span>Logistics</span></h1>
+        <div style="display: flex; align-items: center;">
+          <span class="user-badge" id="display-user-email">Ej inloggad</span>
+          <button class="btn btn-admin" onclick="laskAdminPanel()">Admin Panel</button>
+        </div>
+      </header>
       
-      <div class="split-grid">
+      <div class="panel" id="admin-panel">
+        <div class="panel-title">
+          <span>Hantera Bokningar (Endast Admin)</span>
+          <button class="btn-admin" onclick="laddarBokningar()">Uppdatera lista</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted);">Här listas alla bokningar. Klicka på 'Makulera' för att avboka och frigöra utrustningen.</p>
         
-        <div>
-          <div class="form-group">
-            <label>Vem bokar?</label>
-            <div class="switch-box">
-              <input type="checkbox" id="check-extern" onchange="hanteraBokareTyp()">
-              <label for="check-extern">Jag är extern (Ej ClickUp)</label>
+        <div id="admin-laddar" class="laddar-text" style="display:none; padding: 20px;">Hämtar databasen...</div>
+        
+        <div style="overflow-x: auto;">
+          <table class="admin-table" id="admin-table-body">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Projekt</th>
+                <th>Bokare</th>
+                <th>Datum</th>
+                <th>Utrustning</th>
+                <th>Status</th>
+                <th>Åtgärd</th>
+              </tr>
+            </thead>
+            <tbody>
+              </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Tidslinje & Bokningar</h2>
+        <div id="calendar"></div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">Skapa ny reservering</h2>
+        
+        <div class="split-grid">
+          
+          <div>
+            <div class="form-group">
+              <label>Vem bokar?</label>
+              <div class="switch-box">
+                <input type="checkbox" id="check-extern" onchange="hanteraBokareTyp()">
+                <label for="check-extern">Jag är extern (Ej ClickUp)</label>
+              </div>
+              
+              <div id="box-intern">
+                <select id="clickup-anvandare" disabled>
+                  <option value="">Laddar användare...</option>
+                </select>
+              </div>
+              
+              <div id="box-extern" style="display:none;">
+                <input type="email" id="anvandar-epost" placeholder="Din e-postadress...">
+              </div>
             </div>
             
-            <div id="box-intern">
-              <select id="clickup-anvandare" disabled>
-                <option value="">Laddar användare...</option>
+            <div class="form-group">
+              <label>Projekt</label>
+              <select id="clickup-projekt" disabled>
+                <option value="">Laddar projekt...</option>
               </select>
             </div>
             
-            <div id="box-extern" style="display:none;">
-              <input type="email" id="anvandar-epost" placeholder="Din e-postadress...">
+            <div style="display: flex; gap: 15px;">
+              <div class="form-group" style="flex:1;">
+                <label>Utlämning</label>
+                <input type="date" id="start-datum" onchange="kollaLagersaldo()">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label>Återlämning</label>
+                <input type="date" id="slut-datum" onchange="kollaLagersaldo()">
+              </div>
             </div>
+            
+            <button class="btn" id="btn-submit" onclick="skickaBokning()" style="margin-top: 20px;">Slutför Bokning</button>
+            <div id="status-msg">Behandlar bokning...</div>
           </div>
-          
-          <div class="form-group">
-            <label>Projekt</label>
-            <select id="clickup-projekt" disabled>
-              <option value="">Laddar projekt...</option>
-            </select>
-          </div>
-          
-          <div style="display: flex; gap: 15px;">
-            <div class="form-group" style="flex:1;">
-              <label>Utlämning</label>
-              <input type="date" id="start-datum" onchange="kollaLagersaldo()">
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label>Återlämning</label>
-              <input type="date" id="slut-datum" onchange="kollaLagersaldo()">
-            </div>
-          </div>
-          
-          <button class="btn" id="btn-submit" onclick="skickaBokning()" style="margin-top: 20px;">Slutför Bokning</button>
-          <div id="status-msg">Behandlar bokning...</div>
-        </div>
 
-        <div>
-          <label style="margin-bottom: 15px;">Välj utrustning & Hårddiskar (Lagersaldo beräknas på valda datum)</label>
-          <p id="inventory-help" style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Välj start- och slutdatum till vänster för att låsa upp inventarielistan.</p>
+          <div>
+            <label style="margin-bottom: 15px;">Välj utrustning & Hårddiskar (Lagersaldo beräknas på valda datum)</label>
+            <p id="inventory-help" style="font-size: 13px; color: var(--text-muted); margin-top: -10px; margin-bottom: 20px;">Välj start- och slutdatum till vänster för att låsa upp inventarielistan.</p>
+            
+            <div class="inventory-list" id="inventory-container">
+              </div>
+          </div>
           
-          <div class="inventory-list" id="inventory-container">
-            </div>
         </div>
-        
       </div>
     </div>
   </div>
@@ -285,17 +356,52 @@
   </div>
 
   <script>
-    // Din exakta API URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbwwbhKAq7vzB5hHjWOXZ3jpAO6YWYbJa-49RXK-2QUwj65CprehPR-pjYt4swpzu8eXhg/exec";
+    // ==========================================
+    // 1. GOOGLE INLOGGNINGSLOGIK
+    // ==========================================
     
-    // Säkerhet: PIN-koden för att nå adminpanelen
-    const ADMIN_PIN = "6579";
+    function parseJwt(token) {
+      try {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function hanteraGoogleInloggning(response) {
+      // Om funktionen anropas innebär det att Google har godkänt användaren (rätt domän).
+      const payload = parseJwt(response.credential);
+      
+      // Visa e-posten uppe till höger i gränssnittet
+      if (payload && payload.email) {
+        document.getElementById("display-user-email").innerText = "Inloggad som: " + payload.email;
+      }
+
+      // Dölj inloggningsskärmen och visa hela appen
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app-content").style.display = "block";
+
+      // STARTA APPEN (Hämta data från Google Sheets / ClickUp)
+      laddaSystemData();
+    }
+
+    // ==========================================
+    // 2. KÄRNLOGIK & API
+    // ==========================================
+
+    const API_URL = "https://script.google.com/macros/s/AKfycbwwbhKAq7vzB5hHjWOXZ3jpAO6YWYbJa-49RXK-2QUwj65CprehPR-pjYt4swpzu8eXhg/exec";
+    const ADMIN_PIN = "1234";
 
     let systemData = null;
     let varukorg = {}; 
 
-    // Initiera appen
-    window.onload = function() {
+    // Denna funktion kallades tidigare från window.onload, nu kallas den först när inloggningen är klar.
+    function laddaSystemData() {
       fetch(API_URL + "?action=getInitData")
         .then(res => res.json())
         .then(data => {
@@ -319,7 +425,7 @@
           alert("Nätverksfel vid hämtning av data.");
           console.error(err);
         });
-    };
+    }
 
     /* ==========================================
        ADMIN PANELS LOGIK
@@ -332,15 +438,12 @@
         return;
       }
 
-      // Fråga efter PIN-kod
       const givenPin = prompt("Ange PIN-kod för att låsa upp Admin-panelen:");
       if (givenPin === ADMIN_PIN) {
         panel.style.display = "block";
-        laddarBokningar(); // Hämta all data när panelen öppnas
+        laddarBokningar(); 
       } else {
-        if (givenPin !== null) { // Om användaren inte tryckte avbryt
-          alert("Felaktig PIN-kod. Åtkomst nekad.");
-        }
+        if (givenPin !== null) alert("Felaktig PIN-kod. Åtkomst nekad.");
       }
     }
 
@@ -357,24 +460,22 @@
           laddarText.style.display = "none";
           
           if (!bokningar || bokningar.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='7'>Inga bokningar funna i databasen.</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan='7'>Inga bokningar funna.</td></tr>";
             return;
           }
 
           bokningar.forEach(b => {
             const tr = document.createElement("tr");
-            
-            // Format status badge
             let statusHtml = "";
             let btnDisabled = "";
+            
             if (b.status === "AKTIV") {
               statusHtml = `<span class="status-badge status-aktiv">AKTIV</span>`;
             } else {
               statusHtml = `<span class="status-badge status-avbokad">${b.status}</span>`;
-              btnDisabled = "disabled"; // Kan inte makulera en redan avbokad
+              btnDisabled = "disabled"; 
             }
 
-            // Korta ner ID:t lite för att det ska se snyggt ut
             const kortId = b.id.replace("BOK-", "#");
 
             tr.innerHTML = `
@@ -393,14 +494,11 @@
         })
         .catch(err => {
           laddarText.innerText = "Kunde inte hämta bokningar (Nätverksfel).";
-          console.error(err);
         });
     }
 
     function makuleraBokning(bokningsId) {
-      if (!confirm("Är du säker på att du vill avboka denna order? Utrustningen kommer genast att frigöras i kalendern och lagret.")) {
-        return;
-      }
+      if (!confirm("Är du säker på att du vill avboka denna order?")) return;
 
       const btn = document.getElementById(`btn-cancel-${bokningsId}`);
       btn.innerText = "Vänta...";
@@ -408,34 +506,26 @@
 
       const payloadData = {
         action: "updateBookingStatus",
-        payload: {
-          id: bokningsId,
-          nyStatus: "AVBOKAD"
-        }
+        payload: { id: bokningsId, nyStatus: "AVBOKAD" }
       };
 
       fetch(API_URL, {
-        method: "POST",
-        mode: "cors",
-        body: JSON.stringify(payloadData)
+        method: "POST", mode: "cors", body: JSON.stringify(payloadData)
       })
       .then(res => res.json())
       .then(res => {
         if (res.framgang) {
           alert("Bokningen har makulerats.");
-          laddarBokningar(); // Ladda om listan så status uppdateras
-          // Ladda även om sidan i bakgrunden för att kalendern och formuläret ska rensas från krockar
+          laddarBokningar(); 
           setTimeout(() => { window.location.reload(); }, 1500); 
         } else {
           alert("Kunde inte makulera: " + res.meddelande);
-          btn.innerText = "Makulera";
-          btn.disabled = false;
+          btn.innerText = "Makulera"; btn.disabled = false;
         }
       })
       .catch(err => {
         alert("Nätverksfel. Försök igen.");
-        btn.innerText = "Makulera";
-        btn.disabled = false;
+        btn.innerText = "Makulera"; btn.disabled = false;
       });
     }
 
